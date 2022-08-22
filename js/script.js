@@ -59,7 +59,7 @@ class ContactsApp extends Contacts {
             <div class = "contacts__inputs">
             <input type="text" class="contacts__input__name" placeholder="Name">
             <input type="email" class="contacts__input__email" placeholder="Email">
-            <input type="text" class="contacts__input__address" placeholder="address">
+            <input type="text" class="contacts__input__address" placeholder="Address">
             <input type="phone" class="contacts__input__phone" placeholder="Phone">
             </div>
             <button class = "add">Add contact</button>
@@ -84,16 +84,16 @@ class ContactsApp extends Contacts {
         const ul = document.querySelector('.contacts_items');
         let li = '';
         let list = super.get();
-        list.forEach(({ id, name, email, address, phone }) => {
-            li += ` <li class="contact_book_item" id='${id}'>
+        list.forEach((elem) => {
+            li += ` <li class="contact_book_item" id='${elem.id}'>
                         <span class="contacts_info">
-                            Имя: ${name}<br>
-                            Email: ${email}<br>
-                            Адрес: ${address}<br>
-                            Телефон: ${phone}<br>
+                            Имя: ${elem.name}<br>
+                            Email: ${elem.email}<br>
+                            Адрес: ${elem.address}<br>
+                            Телефон: ${elem.phone}<br>
                         </span>
-                        <button class="btn edit_btn" data-edit="${id}">Редактировать</button>
-                        <button class="btn del_btn" data-del="${id}">Удалить</button>
+                        <button class="btn edit_btn" data-edit="${elem.id}">Редактировать</button>
+                        <button class="btn del_btn" data-del="${elem.id}">Удалить</button>
                     </li>`
         });
         ul.innerHTML = li;
@@ -106,22 +106,30 @@ class ContactsApp extends Contacts {
         addBtn.addEventListener('click', () => {
 
             let inputs = this.inputsInform();
-            let name = inputs[0];;
+            let name = inputs[0];
             let nameValue = name.value;
 
-            let email = inputs[1].value;
+            let email = inputs[1];
             let emailValue = email.value;
 
-            let address = inputs[2].value;
+            let address = inputs[2];
             let addresslValue = address.value;
 
-            let phone = inputs[3].value;
+            let phone = inputs[3];
             let phonelValue = phone.value;
 
-            console.log('------------------------------------------------');
-            console.log(nameValue, emailValue, addresslValue, phonelValue)
-            super.add(nameValue, emailValue, addresslValue, phonelValue);
-            super.get();
+            this.add({
+                name: nameValue,
+                email: emailValue,
+                address: addresslValue,
+                phone: phonelValue
+            });
+            this.get();
+
+            name.value = '';
+            email.value = '';
+            address.value = '';
+            phone.value = '';
 
         });
     }
