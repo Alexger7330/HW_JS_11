@@ -1,5 +1,56 @@
-.contacts__inputs{
+.contacts__inputs {
     width: 50%;
     display: flex;
     flex-direction: column;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, .8);
+}
+
+.modal__container {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal__wrapper {
+    position: relative;
+    background-color: #c5d5c5;
+    border-radius: 15px;
+    padding: 30px;
+    width: 70%;
+    max-height: 70%;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+
+
+.modal__wrapper h2 {
+    margin: 20px auto;
+}
+
+.modal__inputs {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal__closeBtn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 30px;
+    height: 30px;
+    background-color: rgb(246, 37, 37);
+    border: 0;
+    border-radius: 5px;
 }
