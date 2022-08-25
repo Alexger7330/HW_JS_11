@@ -1,47 +1,7 @@
-const Modal = function () {
-    this.init = ({ name, email, address, phone }) => {
-        const elementModal = document.createElement("div");
-        elementModal.classList.add("modal");
-
-        elementModal.innerHTML = `<div class="modal__container">
-                                  <div class="modal__wrapper">
-                                      <h2>Edit Modal</h2>
-                                      <div class = "modal__inputs">
-                                            <input type="text" class="modal__input__name" placeholder="Name" value = '${name}'>
-                                            <input type="email" class="modal__input__email" placeholder="Email" value = '${email}'>
-                                            <input type="text" class="modal__input__address" placeholder="Address" value = '${address}'>
-                                            <input type="phone" class="modal__input__phone" placeholder="Phone" value = '${phone}'>
-                                        </div>
-                                      <button class = 'modal__closeBtn'><i class="fa fa-times" aria-hidden="true"></i></button>
-                                  </div>
-                                 <div>`;
-        document.body.appendChild(elementModal);
-
-        elementModal.addEventListener("click", (e) => {
-            if (e.target.classList[0] === "modal__container") {
-                elementModal.remove();
-            }
-        });
-
-        const closeBtn = document.querySelector(".modal__closeBtn");
-        closeBtn.addEventListener("click", () => {
-            elementModal.remove();
-        });
-    };
-};
-
-const modal = new Modal()
-modal.init({
-    name:'asd',
-    email:'sadfads@ssdf',
-    address:'asdfasdff',
-    phone:'22312'
-})
-
 class User {
-    constructor({ name, email, address, phone }) {
+    constructor({ id, name, email, address, phone }) {
         this.data = {
-            id: `${Math.round(performance.now())}`,
+            id: id || `${Math.round(performance.now())}`,
             name,
             email,
             address,
@@ -98,16 +58,17 @@ class Contacts {
 class ContactsApp extends Contacts {
     constructor(data) {
         super(data)
+        this.contactsData = this.storage || [];
         this.app = document.createElement('div');
         this.app.classList.add('contacts')
         this.app.innerHTML = `<div class="contacts__wrapper">
         <div class="contacts__header">
             <h2 class="contacts__title">Contacts</h2>
             <div class = "contacts__inputs">
-            <input type="text" class="contacts__input__name" placeholder="Name">
-            <input type="email" class="contacts__input__email" placeholder="Email">
-            <input type="text" class="contacts__input__address" placeholder="Address">
-            <input type="phone" class="contacts__input__phone" placeholder="Phone">
+            <input type="text" class="contacts__input__name" placeholder="Name" value = 'Alex'>
+            <input type="email" class="contacts__input__email" placeholder="Email" value = 'alex@gmail.com'>
+            <input type="text" class="contacts__input__address" placeholder="Address" value = 'Bla'>
+            <input type="phone" class="contacts__input__phone" placeholder="Phone" value = '465465'>
             </div>
             <button class = "add">Add contact</button>
         </div>
@@ -116,8 +77,11 @@ class ContactsApp extends Contacts {
         </div>    
       </div>`
         document.body.appendChild(this.app)
+        this.checkCookie();
         this.onAdd();
+        this.get()
     }
+
 
     inputsInform() {
         let inputName = document.querySelector('.contacts__input__name');
@@ -134,12 +98,12 @@ class ContactsApp extends Contacts {
         list.forEach(({ data: { id, name, email, address, phone } }) => {
             if (id && name && email && address && phone) {
                 li += ` <li class="contact_book_item" id='${id}'>
-                        <span class="contacts_info">
+                        <p class="contacts_info">
                             Имя: ${name}<br>
                             Email: ${email}<br>
                             Адрес: ${address}<br>
                             Телефон: ${phone}<br>
-                        </span>
+                        </p>
                         <button class="btn edit_btn" data-edit="${id}">Редактировать</button>
                         <button class="btn del_btn" data-del="${id}">Удалить</button>
                     </li>`
@@ -147,6 +111,7 @@ class ContactsApp extends Contacts {
         });
         ul.innerHTML = li;
         this.btnDellListener();
+        this.btnEditListener();
     }
 
     onAdd() {
@@ -173,6 +138,7 @@ class ContactsApp extends Contacts {
                 address: addresslValue,
                 phone: phonelValue
             });
+            this.storage = this.contactsData
             this.get();
 
             name.value = '';
@@ -188,30 +154,21 @@ class ContactsApp extends Contacts {
         edit_buttons.forEach((elem) => {
             elem.addEventListener('click', (event) => {
                 let chooseId = event.target.dataset.edit;
-                let modalWindow = this.openAddEditModal(2, chooseId);
-                this.onEdit(chooseId, modalWindow);
+
+                super.get().find((user) => {
+                    if (user.data.id === chooseId) {
+                        this.modal(user.data)
+                    }
+                })
             })
         });
     }
-    // onEdit(id,modalWindow){
-    //     const editdBtn=modalWindow.querySelector('.edit_btn_modal');
 
-    //     editdBtn.addEventListener('click',()=>{
-
-    //                 let inputs=this.findInput();
-    //                 let name=inputs[0].value;
-    //                 let email=inputs[1].value;
-    //                 let addres=inputs[2].value;
-    //                 let phone=inputs[3].value;
-    //                 if(this.Verification(name) && this.VerificationEmail(email) && this.Verification(addres) && this.VerificationPhone(phone)){
-    //                     this.edit(id,{id,name,email,addres,phone}); 
-    //                     this.get();
-    //                     modalWindow.remove();
-    //                 }
-
-
-    //     });
-    // }
+    onEdit(id, name, email, address, phone) {
+        this.edit(id, { id, name, email, address, phone });
+        this.storage = this.contactsData;
+        this.get();
+    }
 
     btnDellListener() {
         const del_btns = document.querySelectorAll('.del_btn');
@@ -223,8 +180,104 @@ class ContactsApp extends Contacts {
     }
     onRemove(id) {
         this.remove(id);
+        this.storage = this.contactsData
         this.get();
     }
-}
+
+    get storage() {
+        let contactsData = localStorage.getItem('contactsData');
+        let localArr = [];
+        if (contactsData !== null) {
+
+            localArr = JSON.parse(contactsData);
+            localArr = localArr.map((elem) => {
+                let data = elem.data;
+                elem = new User(data);
+                return elem;
+            })
+        } else {
+            return false;
+        }
+        return localArr;
+    }
+
+    set storage(newContactsData) {
+        localStorage.setItem('contactsData', JSON.stringify(newContactsData))
+        this.cookiesLife()
+    }
+
+    getCookie(name) {
+        var matches = document.cookie.match(new RegExp(
+            "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+        ));
+        return matches ? decodeURIComponent(matches[1]) : undefined;
+    }
+
+    checkCookie() {
+        if (this.getCookie('storageExpiration') === undefined) {
+            localStorage.clear();
+        }
+    }
+
+    cookiesLife() {
+        let date = new Date(Date.now());
+        document.cookie = 'storageExpiration=' + date.toUTCString() + ';max-age=864000';
+    }
+
+    modal({ id, name, email, address, phone }) {
+        const elementModal = document.createElement("div");
+        elementModal.classList.add("modal");
+
+        elementModal.innerHTML = `<div class="modal__container">
+                                          <div class="modal__wrapper">
+                                              <h2>Edit Modal</h2>
+                                              <div class = "modal__inputs">
+                                                    <input type="text" class="modal__input__name" placeholder="Name" value = '${name}'>
+                                                    <input type="email" class="modal__input__email" placeholder="Email" value = '${email}'>
+                                                    <input type="text" class="modal__input__address" placeholder="Address" value = '${address}'>
+                                                    <input type="phone" class="modal__input__phone" placeholder="Phone" value = '${phone}'>
+                                                </div>
+                                                <button class = 'modal__save'>Save</button>
+                                              <button class = 'modal__closeBtn'><i class="fa fa-times" aria-hidden="true"></i></button>
+                                          </div>
+                                         <div>`;
+        document.body.appendChild(elementModal);
+
+
+        const saveBtn = document.querySelector(".modal__save");
+        saveBtn.addEventListener("click", () => {
+
+            const inputName = document.querySelector('.modal__input__name');
+            const inputEmail = document.querySelector('.modal__input__email');
+            const inputAddress = document.querySelector('.modal__input__address');
+            const inputPhone = document.querySelector('.modal__input__phone');
+
+            let name = inputName.value;
+
+            let email = inputEmail.value;
+
+            let address = inputAddress.value;
+
+            let phone = inputPhone.value;
+
+            this.onEdit(id, name, email, address, phone)
+            elementModal.remove();
+        });
+
+        elementModal.addEventListener("click", (e) => {
+            if (e.target.classList[0] === "modal__container") {
+                elementModal.remove();
+            }
+        });
+
+        const closeBtn = document.querySelector(".modal__closeBtn");
+        closeBtn.addEventListener("click", () => {
+            elementModal.remove();
+        });
+
+    }
+
+};
+
 
 let contactsApp = new ContactsApp()
