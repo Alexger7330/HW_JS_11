@@ -56,9 +56,16 @@ class Contacts {
 
 
 class ContactsApp extends Contacts {
-    constructor(data) {
-        super(data)
+    constructor() {
+        super()
         this.contactsData = this.storage || [];
+        this.createDOM();
+        this.checkCookie();
+        this.onAdd();
+        this.get()
+    }
+
+    createDOM(){
         this.app = document.createElement('div');
         this.app.classList.add('contacts')
         this.app.innerHTML = `<div class="contacts__wrapper">
@@ -77,9 +84,6 @@ class ContactsApp extends Contacts {
         </div>    
       </div>`
         document.body.appendChild(this.app)
-        this.checkCookie();
-        this.onAdd();
-        this.get()
     }
 
 
@@ -98,12 +102,12 @@ class ContactsApp extends Contacts {
         list.forEach(({ data: { id, name, email, address, phone } }) => {
             if (id && name && email && address && phone) {
                 li += ` <li class="contact_book_item" id='${id}'>
-                        <p class="contacts_info">
-                            Имя: ${name}<br>
-                            Email: ${email}<br>
-                            Адрес: ${address}<br>
-                            Телефон: ${phone}<br>
-                        </p>
+                        <div class="contacts_info">
+                            <p>Имя: ${name}</p>
+                            <p>Email: ${email}</p>
+                            <p>Адрес: ${address}</p>
+                            <p>Телефон: ${phone}</p>
+                        </div>
                         <button class="btn edit_btn" data-edit="${id}">Редактировать</button>
                         <button class="btn del_btn" data-del="${id}">Удалить</button>
                     </li>`
