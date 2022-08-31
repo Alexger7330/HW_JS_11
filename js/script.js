@@ -200,7 +200,7 @@ class ContactsApp extends Contacts {
                 return elem;
             })
         } else {
-            return false;
+            return undefined;
         }
         return localArr;
     }
